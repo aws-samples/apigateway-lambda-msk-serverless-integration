@@ -60,5 +60,10 @@
     "function_event_source_consumer_group_id": "ServerlessKafkaConsumerGroup",
     "function_event_source_batch_size": 100,
     "topic_name": "ServerlessKafkaTopic"
-  }
+  },
+  "availability-zones:account=547105676204:region=eu-central-1": [
+    "eu-central-1a",
+    "eu-central-1b",
+    "eu-central-1c"
+  ]
 }
