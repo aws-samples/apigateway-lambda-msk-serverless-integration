@@ -129,8 +129,6 @@ See the log entry of the received Kafka messages in the log of the Lambda Functi
 
 ![1690914679886](image/README/1690914679886.png)
 
-For load testing the application, which is important to calibrate the parameters, you can go with a tool like Artillery to simulate workloads. You can find a sample artillery script in the /load-testing folder.
-
 ## Cleaning up
 
 Within the subdirectory “serverless-kafka-iac”, delete the test infrastructure:
