@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-reflect</artifactId>
-            <version>${scala.version}.0</version>
+            <version>${scala.version}.11</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -159,7 +159,7 @@
       <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
-        <version>2.13.0-M3-f73b161</version>
+        <version>2.13.11</version>
       </dependency>
     </dependencies>
 
