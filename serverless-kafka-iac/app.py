@@ -52,9 +52,10 @@ from serverless_kafka.serverless_kafka_msk_stack import ServerlessKafkaMSKStack
 #######################################################################################################################
 #######################################################################################################################
 
+# Importing the CDK app (context from cdk.context.json is added automatically)
 app = cdk.App()
 
-
+# Creating a VPC Stack for the Serverless Kafka application
 vpcStack = ServerlessKafkaVPCStack(
     app,
     construct_id="ServerlessKafkaVPCStack",
@@ -65,6 +66,7 @@ vpcStack = ServerlessKafkaVPCStack(
     )
 )
 
+# Creating a MSK (Managed Streaming for Apache Kafka) stack
 serverless_kafka_msk_stack = ServerlessKafkaMSKStack(
     app,
     construct_id="ServerlessKafkaMSKStack",
@@ -73,48 +75,55 @@ serverless_kafka_msk_stack = ServerlessKafkaMSKStack(
     env=cdk.Environment(
         account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
     ),
-    vpcStack=vpcStack,
+    vpcStack=vpcStack, # Passing the created VPC
 )
 
+# Creating a Handler Stack for the Serverless Kafka application
 serverless_handler = ServerlessKafkaHandlerStack(
     app,
     construct_id="ServerlessKafkaHandlerStack",
     app_config_id="app_config",
     stack_config_id="serverless_kafka_handler_config",
-    kafka_vpc=serverless_kafka_msk_stack.kafka_vpc,
-    kafka_security_group=serverless_kafka_msk_stack.kafka_security_group,
-    msk_arn=serverless_kafka_msk_stack.msk_arn,
+    kafka_vpc=serverless_kafka_msk_stack.kafka_vpc, # Using Kafka VPC from MSK Stack
+    kafka_security_group=serverless_kafka_msk_stack.kafka_security_group, # Using Security Group from MSK Stack
+    msk_arn=serverless_kafka_msk_stack.msk_arn, # Using Amazon Resource Name from MSK Stack
     env=cdk.Environment(
         account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
     )
 )
 
+# Creating a Producer Stack for the Serverless Kafka application
 serverless_producer = ServerlessKafkaProducerStack(
     app,
     construct_id="ServerlessKafkaProducerStack",
     app_config_id="app_config",
     stack_config_id="serverless_kafka_producer_config",
-    kafka_vpc=serverless_kafka_msk_stack.kafka_vpc,
-    kafka_security_group=serverless_kafka_msk_stack.kafka_security_group,
-    msk_arn=serverless_kafka_msk_stack.msk_arn,
-    kafka_bootstrap_server=serverless_handler.get_kafka_bootstrap_server,
+    kafka_vpc=serverless_kafka_msk_stack.kafka_vpc, # Using Kafka VPC from MSK Stack
+    kafka_security_group=serverless_kafka_msk_stack.kafka_security_group, # Using Security Group from MSK Stack
+    msk_arn=serverless_kafka_msk_stack.msk_arn, # Using Amazon Resource Name from MSK Stack
+    kafka_bootstrap_server=serverless_handler.get_kafka_bootstrap_server, # Using Bootstrap Server from Handler Stack
     env=cdk.Environment(
         account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
     )
 )
 
+# Creating a Consumer Stack for the Serverless Kafka application
 serverless_consumer = ServerlessKafkaConsumerStack(
      app,
     construct_id="ServerlessKafkaConsumerStack",
     app_config_id="app_config",
     stack_config_id="serverless_kafka_consumer_config",
-    kafka_vpc=serverless_kafka_msk_stack.kafka_vpc,
-    kafka_security_group=serverless_kafka_msk_stack.kafka_security_group,
-    msk_arn=serverless_kafka_msk_stack.msk_arn,
+    kafka_vpc=serverless_kafka_msk_stack.kafka_vpc, # Using Kafka VPC from MSK Stack
+    kafka_security_group=serverless_kafka_msk_stack.kafka_security_group, # Using Security Group from MSK Stack
+    msk_arn=serverless_kafka_msk_stack.msk_arn, # Using Amazon Resource Name from MSK Stack
     env=cdk.Environment(
         account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
     )
 )
+
+# Adding a dependency to the serverless_consumer on serverless_handler
+# to ensure that handler stack is fully deployed before consumer stack
 serverless_consumer.add_dependency(serverless_handler)
 
+# Synthesizing the app which compiles it into a CloudFormation template
 app.synth()
