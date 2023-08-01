@@ -1,10 +1,6 @@
 # API-Gateway Lambda MSK Serverless Integration
 
-[![Java Producer CI with Maven](https://github.com/aws-samples/apigateway-lambda-msk-serverless-integration/actions/workflows/maven-producer.yml/badge.svg)](https://github.com/aws-samples/serverless-kafka-producer/actions/workflows/maven-producer.yml)
-
-[![Java KafkaHandler CI with Maven](https://github.com/aws-samples/apigateway-lambda-msk-serverless-integration/actions/workflows/maven-handler.yml/badge.svg)](https://github.com/aws-samples/serverless-kafka-producer/actions/workflows/maven-handler.yml)
-
-[![CDK Test](https://github.com/aws-samples/apigateway-lambda-msk-serverless-integration/actions/workflows/cdk-test.yml/badge.svg)](https://github.com/aws-samples/serverless-kafka-producer/actions/workflows/cdk-test.yml)
+[![Java Producer CI with Maven](https://github.com/aws-samples/apigateway-lambda-msk-serverless-integration/actions/workflows/maven-producer.yml/badge.svg)](https://github.com/aws-samples/serverless-kafka-producer/actions/workflows/maven-producer.yml) [![Java KafkaHandler CI with Maven](https://github.com/aws-samples/apigateway-lambda-msk-serverless-integration/actions/workflows/maven-handler.yml/badge.svg)](https://github.com/aws-samples/serverless-kafka-producer/actions/workflows/maven-handler.yml) [![CDK Test](https://github.com/aws-samples/apigateway-lambda-msk-serverless-integration/actions/workflows/cdk-test.yml/badge.svg)](https://github.com/aws-samples/serverless-kafka-producer/actions/workflows/cdk-test.yml)
 
 ## Getting started...
 
