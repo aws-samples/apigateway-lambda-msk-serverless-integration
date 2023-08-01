@@ -29,8 +29,13 @@ jobs:
         python -m pip install aws-cdk-lib
         pip install -r serverless-kafka-iac/requirements.txt
         pip install -r serverless-kafka-iac/requirements-dev.txt
-        export PYTHONPATH=$PYTHONPATH:./serverless-kafka-iac/serverless_kafka
-        echo $PYTHONPATH
+
+    - name: set pythonpath
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:serverlesskafka_iac/serverless_kafka" >> $GITHUB_ENV
+        echo $GITHUB_ENV
+
+
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
