@@ -1,0 +1,64 @@
+{
+  "app_config": {
+    "application_tag": "ServerlessKafka"
+  },
+  "vpc_config": {
+    "stack_tag": "ServerlessKafkaVPCStack",
+    "vpc_name": "KafkaVPC",
+    "vpc_cidr_range": "10.0.0.0/16",
+    "enable_flow_logs": "yes"
+  },
+  "msk_serverless_config": {
+    "stack_tag": "ServerlessKafkaMSKStack",
+    "cluster_name": "ServerlessKafkaCluster",
+    "cluster_id": "Cluster",
+    "security_group_id": "ClusterSecGroup",
+    "enable_bastion_host": "yes",
+    "bastion_host_instance_type": "t2.micro",
+    "enable_eni_delete": "yes"
+  },
+  "serverless_kafka_handler_config": {
+    "stack_tag": "ServerlessKafkaHandlerStack",
+    "function_id": "HandlerLambda",
+    "function_name": "ServerlessKafkaHandlerLambda",
+    "function_timeout_seconds": 150,
+    "function_log_retention_enum": "ONE_DAY",
+    "function_max_concurrency": 60,
+    "function_java_tool_options": "-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -DLOG_LEVEL=INFO",
+    "function_memory_size": 256,
+    "function_tracing_enabled": "yes",
+    "topic_name": "ServerlessKafkaTopic"
+  },
+  "serverless_kafka_producer_config": {
+    "stack_tag": "ServerlessKafkaProducerStack",
+    "function_id": "ProducerLambda",
+    "function_name": "ServerlessKafkaProducerLambda",
+    "function_timeout_seconds": 150,
+    "function_log_retention_enum": "ONE_DAY",
+    "function_max_concurrency": 60,
+    "function_java_tool_options": "-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -DLOG_LEVEL=INFO",
+    "function_memory_size": 256,
+    "function_tracing_enabled": "yes",
+    "function_powertools_log_level": "INFO",
+    "function_powertools_service_name": "ServerlessKafkaProducer",
+    "apigateway_api_id": "ProducerAPI",
+    "apigateway_rest_api_name": "ServerlessKafkaProducerAPI",
+    "apigateway_method_log_level": "INFO",
+    "apigateway_data_trace_enabled": "yes",
+    "apigateway_tracing_enabled": "yes",
+    "topic_name": "ServerlessKafkaTopic"
+  },
+  "serverless_kafka_consumer_config": {
+    "stack_tag": "ServerlessKafkaConsumerStack",
+    "function_id": "ConsumerLambda",
+    "function_name": "ServerlessKafkaConsumerLambda",
+    "function_timeout_seconds": 150,
+    "function_log_retention_enum": "ONE_DAY",
+    "function_max_concurrency": 60,
+    "function_memory_size": 256,
+    "function_tracing_enabled": "yes",
+    "function_event_source_consumer_group_id": "ServerlessKafkaConsumerGroup",
+    "function_event_source_batch_size": 100,
+    "topic_name": "ServerlessKafkaTopic"
+  }
+}

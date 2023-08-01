@@ -1,0 +1,9 @@
+.vscode/
+cdk.out/
+.venv/
+.bandit
+.DS_Store
+target/
+__pycache__/
+.pytest_cache
+.benchmarks
