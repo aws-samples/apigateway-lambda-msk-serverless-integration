@@ -10,6 +10,7 @@ from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_lambda as _lambda
+from aws_cdk import aws_xray as xray
 from constructs import Construct
 
 from .helpers import get_group_name, get_topic_name, add_permissions_to_role_policy, map_string_to_retention_days, add_permissions_to_policy
@@ -54,6 +55,7 @@ class ServerlessKafkaProducerStack(Stack):
             bootstrap_broker=kafka_bootstrap_server,
             msk_arn=msk_arn,
             topic_name=topic_name,
+            app_config=app_config,
             serverless_kafka_producer_config=serverless_kafka_producer_config
         )
 
@@ -78,14 +80,16 @@ class ServerlessKafkaProducerStack(Stack):
             rest_api_name=serverless_kafka_producer_config.get("apigateway_rest_api_name", "ServerlessKafkaProducerAPI"),
             cloud_watch_role=False,
             deploy_options=apig.StageOptions(
-                logging_level=apig.MethodLoggingLevel.INFO if serverless_kafka_producer_config.get("apigateway_rest_api_name", 'INFO') == "INFO" else apig.MethodLoggingLevel.ERROR if serverless_kafka_producer_config.get("apigateway_rest_api_name", 'INFO') == "ERROR" else apig.MethodLoggingLevel.OFF,
+                logging_level=apig.MethodLoggingLevel.INFO if serverless_kafka_producer_config.get("apigateway_method_log_level", 'INFO') == "INFO" else apig.MethodLoggingLevel.ERROR if serverless_kafka_producer_config.get("apigateway_rest_api_name", 'INFO') == "ERROR" else apig.MethodLoggingLevel.OFF,
                 data_trace_enabled=True if serverless_kafka_producer_config.get("apigateway_data_trace_enabled", "yes") == "yes" else False,
                 tracing_enabled=True if serverless_kafka_producer_config.get("apigateway_tracing_enabled", "yes") == "yes" else False,
-                cache_data_encrypted=True,
+                cache_data_encrypted=True if serverless_kafka_producer_config.get("apigateway_cache_data_encrypted", "yes") == "yes" else False,
+                metrics_enabled=True if serverless_kafka_producer_config.get("apigateway_metrics_enabled", "yes") == "yes" else False,
                 access_log_destination=apig.LogGroupLogDestination(
                         logs.LogGroup(self, "AccessLogs", retention=logs.RetentionDays.ONE_WEEK)
                     ),
-                access_log_format=apig.AccessLogFormat.clf()
+                access_log_format=apig.AccessLogFormat.clf(),
+                
             ),
             default_method_options=apig.MethodOptions(
                 authorization_type=apig.AuthorizationType.IAM 
@@ -116,14 +120,17 @@ class ServerlessKafkaProducerStack(Stack):
                                                         validate_request_body=True,)
 
 
-        # Define a POST method on the resource with request validation
-        resource.add_method('POST', 
+        # Define a method on the resource with request validation
+        method = resource.add_method(serverless_kafka_producer_config.get("apigateway_api_method","POST"), 
                             apig.LambdaIntegration(_function, request_templates={"application/json": '{"statusCode": 200}'}),
                             request_validator=request_validator,
                             request_models={"application/json": request_model})
         
-        rest_id_output = CfnOutput(scope=self, id="ProducerAPIOutput_Rest_ID", value=rest_api.rest_api_id )
-        resource_id_output = CfnOutput(scope=self, id="ProducerAPIOutput_Resource_ID", value=resource.resource_id )
+
+
+        rest_full_path_output = CfnOutput(scope=self, id="ProducerAPIOutputResourcePath", value=resource.path )
+        rest_method_output = CfnOutput(scope=self, id="ProducerAPIOutputAPIMethod", value=method.http_method )
+
 
     # Function to create the producer lambda and all necessary settings and authentications
     def init_proxy_lambda(
@@ -133,6 +140,7 @@ class ServerlessKafkaProducerStack(Stack):
         bootstrap_broker: str,
         msk_arn: str,
         topic_name: str,
+        app_config,
         serverless_kafka_producer_config
     ):
         
@@ -193,6 +201,7 @@ class ServerlessKafkaProducerStack(Stack):
             log_retention=map_string_to_retention_days(serverless_kafka_producer_config.get("function_log_retention_enum", "ONE_DAY")),
             code=self.build_mvn_package(),
             tracing=_lambda.Tracing.ACTIVE if serverless_kafka_producer_config.get("function_tracing_enabled", "yes") else _lambda.Tracing.DISABLED,
+            
             role=kafka_producer_role,
             log_retention_role=kafka_producer_log_retention_role,
             vpc=vpc,
@@ -206,6 +215,7 @@ class ServerlessKafkaProducerStack(Stack):
                 "TOPIC_NAME": topic_name,
                 "JAVA_TOOL_OPTIONS": serverless_kafka_producer_config.get("function_java_tool_options", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -DLOG_LEVEL=INFO"),
                 "POWERTOOLS_LOG_LEVEL": serverless_kafka_producer_config.get("function_powertools_log_level", "INFO"),
+                "POWERTOOLS_METRICS_NAMESPACE": app_config.get('application_tag', "ServerlessKafka"),                
                 "POWERTOOLS_SERVICE_NAME": serverless_kafka_producer_config.get("function_powertools_service_name", "ServerlessKafkaProducer")
             },
             memory_size=serverless_kafka_producer_config.get("function_memory_size", 256)
@@ -216,6 +226,26 @@ class ServerlessKafkaProducerStack(Stack):
         )
         l1_function:_lambda.CfnFunction = kafka_producer_lambda.node.default_child
         l1_function.snap_start = snap_start_property
+
+
+
+                # Define an X-Ray Sampling Rule
+        # xray.CfnSamplingRule(self, id=serverless_kafka_producer_config.get("function_id", "ProducerLambda") + "XRaySamplingRule",
+        #     rule_name=serverless_kafka_producer_config.get("function_id", "ProducerLambda") + "XRay",
+        #     sampling_rule=xray.CfnSamplingRule.SamplingRuleProperty(
+        #         resource_arn="*",  #kafka_producer_lambda.function_arn,
+        #         priority=10,
+        #         fixed_rate=0.05,  
+        #         reservoir_size=50,
+        #         service_type="*",
+        #         service_name="*",
+        #         host="*",
+        #         http_method="*",
+        #         url_path="*",
+        #         version=1,
+        #     )
+        # )
+
 
         # Defining the permissions for the Lambda function
         permissions = {

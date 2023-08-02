@@ -3,6 +3,7 @@
 
 import logging as log
 from pathlib import Path
+import subprocess, shutil, os
 
 from aws_cdk import (Duration, Stack)
 from aws_cdk import aws_ec2 as ec2
@@ -49,7 +50,9 @@ class ServerlessKafkaConsumerStack(Stack):
             kafka_security_group=kafka_security_group,
             msk_arn=msk_arn,
             topic_name=topic_name,
+            app_config=app_config,
             serverless_kafka_consumer_config=serverless_kafka_consumer_config
+
         )
 
     # Create the Kafka consumer Lambda function
@@ -59,7 +62,9 @@ class ServerlessKafkaConsumerStack(Stack):
         kafka_security_group: ec2.ISecurityGroup,
         msk_arn: str,
         topic_name: str,
+        app_config,
         serverless_kafka_consumer_config
+
     ):
 
         # Define consumer group ID
@@ -93,7 +98,10 @@ class ServerlessKafkaConsumerStack(Stack):
                                                             "ec2:DescribeSecurityGroups",
                                                             "logs:CreateLogGroup",
                                                             "logs:CreateLogStream",
-                                                            "logs:PutLogEvents"
+                                                            "logs:PutLogEvents",
+                                                            "xray:PutTraceSegments",
+                                                            "xray:PutTelemetryRecords"
+
                                                         ],
                                                         resources=["*"]
                                                     )
@@ -133,6 +141,10 @@ class ServerlessKafkaConsumerStack(Stack):
                 "logs:PutRetentionPolicy": ["arn:aws:logs:*:*:*"] ,
                 "logs:DeleteRetentionPolicy": ["arn:aws:logs:*:*:*"]
         })
+        
+        consumer_function_lambda_Layer= _lambda.LayerVersion.from_layer_version_arn(self, 
+                                                                                    serverless_kafka_consumer_config.get("function_id", "ConsumerLambda") + "Layer", 
+                                                                                     layer_version_arn=f"arn:aws:lambda:{self.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:40")
 
         # Create Lambda function and settings
         consumer_function = _lambda.Function(
@@ -146,11 +158,15 @@ class ServerlessKafkaConsumerStack(Stack):
             code=_lambda.Code.from_asset(path= '../serverless-kafka-iam-consumer'),
             tracing=_lambda.Tracing.ACTIVE if serverless_kafka_consumer_config.get("function_tracing_enabled", "yes") else _lambda.Tracing.DISABLED,
             vpc=vpc,
+            layers=[consumer_function_lambda_Layer],
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             environment={
-                "TOPIC_NAME": topic_name
+                "TOPIC_NAME": topic_name,
+                "POWERTOOLS_SERVICE_NAME": serverless_kafka_consumer_config.get("function_name", "ServerlessKafkaConsumer"),
+                "POWERTOOLS_METRICS_NAMESPACE": app_config.get('application_tag', "ServerlessKafka"),
+                "LOG_LEVEL": "INFO"
             },
             role=kafka_consumer_role,
             log_retention_role=kafka_consumer_log_retention_role
@@ -171,3 +187,4 @@ class ServerlessKafkaConsumerStack(Stack):
                 starting_position=_lambda.StartingPosition.TRIM_HORIZON,
             )
         )
+

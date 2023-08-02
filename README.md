@@ -4,7 +4,6 @@
 
 ## Getting started...
 
-
 This example walks you through how to build a Serverless End-to-End Apache Kafka integration application using [Amazon](https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html) [MSK Serverless](https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html), [Amazon API Gateway](https://aws.amazon.com/api-gateway/) and [AWS Lambda](https://aws.amazon.com/lambda/).
 
 For testing, this repo includes a sample [AWS Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/v2/guide/home.html) application. This creates a demo environment, including an [Amazon MSK Serverless ](https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html)cluster, three AWS Lambda functions and an Amazon API Gateway.
@@ -53,7 +52,7 @@ The example has the following prerequisites:
 Change current directory to subdirectory “serverless-kafka-iac”
 
 ```
-$ cd serverless-kafka-iac
+cd serverless-kafka-iac
 ```
 
 Configure environment variables
@@ -66,51 +65,49 @@ export CDK_DEFAULT_REGION=$(aws configure get region)
 Create a python virtual environment
 
 ```
-$ python3 -m venv .venv
+python3 -m venv .venv
 ```
 
 After the init process completes and the virtualenv is created, you can use the following
 step to activate your virtualenv.
 
 ```
-$ source .venv/bin/activate
+source .venv/bin/activate
 ```
 
 Install cdk requirements
 
 ```
-$ pip3 install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Bootstrap your account for CDK usage
 
 ```
-$ cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$CDK_DEFAULT_REGION
+cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$CDK_DEFAULT_REGION
 ```
 
 Run cdk synth to build code and test requirements
 
 ```
-$ cdk synth
+cdk synth
 ```
 
 Run ‘cdk deploy’ to deploy the code to your AWS account
 
 ```
-$ cdk deploy --all
+cdk deploy --all
 ```
 
 ### Testing the example
 
-Open a terminal on your development machine to test the API with the bash script provided under "/serverless_kafka_iac/test-api.sh"
-
-(On Windows-machines, please use sample in bash script to construct a similar Windows-"aws apigateway test-invoke-method"-cli-call):
+Open a terminal on your development machine to test the API with the python script provided under "/serverless_kafka_iac/test_api.py"
 
 ```
-$ ./test-api.sh
+python3 test_api.py
 ```
 
-![1690914490390](image/README/1690914490390.png)
+![1690986446939](image/README/1690986446939.png)
 
 Go to the AWS Lambda Console and open the AWS Lambda-function named "ServerlessKafkaConsumer"
 
@@ -133,7 +130,7 @@ See the log entry of the received Kafka messages in the log of the Lambda Functi
 Within the subdirectory “serverless-kafka-iac”, delete the test infrastructure:
 
 ```
-$ cdk destroy –all 
+cdk destroy –all 
 ```
 
 ## Useful commands

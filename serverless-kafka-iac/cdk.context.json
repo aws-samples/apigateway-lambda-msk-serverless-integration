@@ -43,9 +43,12 @@
     "function_powertools_service_name": "ServerlessKafkaProducer",
     "apigateway_api_id": "ProducerAPI",
     "apigateway_rest_api_name": "ServerlessKafkaProducerAPI",
+    "apigateway_api_method": "POST",
     "apigateway_method_log_level": "INFO",
     "apigateway_data_trace_enabled": "yes",
     "apigateway_tracing_enabled": "yes",
+    "apigateway_cache_data_encrypted": "yes",
+    "apigateway_metrics_enabled": "yes",
     "topic_name": "ServerlessKafkaTopic"
   },
   "serverless_kafka_consumer_config": {
@@ -60,5 +63,10 @@
     "function_event_source_consumer_group_id": "ServerlessKafkaConsumerGroup",
     "function_event_source_batch_size": 100,
     "topic_name": "ServerlessKafkaTopic"
-  }
+  },
+  "availability-zones:account=547105676204:region=eu-central-1": [
+    "eu-central-1a",
+    "eu-central-1b",
+    "eu-central-1c"
+  ]
 }
