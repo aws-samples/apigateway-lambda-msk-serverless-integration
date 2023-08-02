@@ -106,7 +106,7 @@ cdk deploy --all
 Open a terminal on your development machine to test the API with the python script provided under "/serverless_kafka_iac/test_api.py"
 
 ```
-python3 test_api.py
+python3 test-api.py
 ```
 
 ![1690986599188](image/README/1690986599188.png)
