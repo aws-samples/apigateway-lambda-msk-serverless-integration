@@ -2,3 +2,4 @@ aws-cdk-lib
 constructs
 cfnresponse
 aws-lambda-powertools
+boto3
