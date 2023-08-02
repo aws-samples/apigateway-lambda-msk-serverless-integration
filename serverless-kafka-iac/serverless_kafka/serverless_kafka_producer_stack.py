@@ -96,7 +96,7 @@ class ServerlessKafkaProducerStack(Stack):
             ),
         )
         # Define a resource
-        resource = rest_api.root.add_resource(serverless_kafka_producer_config.get("apigateway_api_id", "ProducerAPI") + "Resource")
+        api_resource = rest_api.root.add_resource(serverless_kafka_producer_config.get("apigateway_api_id", "ProducerAPI") + "Resource")
 
         # Define request model for validation
         request_model = apig.Model(self, serverless_kafka_producer_config.get("apigateway_api_id", "ProducerAPI") + "RequestModel",
@@ -121,14 +121,14 @@ class ServerlessKafkaProducerStack(Stack):
 
 
         # Define a method on the resource with request validation
-        method = resource.add_method(serverless_kafka_producer_config.get("apigateway_api_method","POST"), 
+        method = api_resource.add_method(serverless_kafka_producer_config.get("apigateway_api_method","POST"), 
                             apig.LambdaIntegration(_function, request_templates={"application/json": '{"statusCode": 200}'}),
                             request_validator=request_validator,
                             request_models={"application/json": request_model})
         
 
 
-        rest_full_path_output = CfnOutput(scope=self, id="ProducerAPIOutputResourcePath", value=resource.path )
+        rest_full_path_output = CfnOutput(scope=self, id="ProducerAPIOutputResourcePath", value=api_resource.path )
         rest_method_output = CfnOutput(scope=self, id="ProducerAPIOutputAPIMethod", value=method.http_method )
 
 
