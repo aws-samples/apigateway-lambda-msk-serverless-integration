@@ -3,3 +3,4 @@ constructs
 cfnresponse
 aws-lambda-powertools
 boto3
+requests
